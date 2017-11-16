@@ -1,0 +1,44 @@
+version: 0.1.{build}-ALPHA
+skip_tags: true
+image: Visual Studio 2017 Preview
+environment:
+  project_name: Itofinity-Dvcs-Extension
+  github_access_token:
+    secure: goOlUHXLAwoZzDBjQLIDVMPJlsSwXcxKE/ulw4qrmZRyvMwOi37SOHCP6a2ADqMY
+  nuget_api_key:
+    secure: qTIvhxyMmoK96PQjCdn6o1hzwsc9vivjNpmbQ9s/xnqpKrnQVAxRTa0gK5VQ3yGs
+  test_configuration: Debug
+  publish_configuration: Release
+build_script:
+- ps: >-
+    nuget update -self;
+    nuget restore;
+    dotnet build /p:Version=$Env:APPVEYOR_BUILD_VERSION  /p:Configuration=$Env:test_configuration;
+    dotnet publish --framework netcoreapp2.0 --runtime win-x64 /p:Version=$Env:APPVEYOR_BUILD_VERSION /p:Configuration=$Env:publish_configuration;
+    dotnet publish --framework netcoreapp2.0 --runtime linux-x64 /p:Version=$Env:APPVEYOR_BUILD_VERSION /p:Configuration=$Env:publish_configuration;
+    dotnet publish --framework netcoreapp2.0 --runtime osx-x64 /p:Version=$Env:APPVEYOR_BUILD_VERSION /p:Configuration=$Env:publish_configuration;
+artifacts:
+- path: src\Itofinity.Dvcs.Extensions\bin\$(publish_configuration)\netcoreapp2.0\win-x64\publish
+  name: $(APPVEYOR_PROJECT_NAME)-win-x64-$(appveyor_build_version)
+- path: src\Itofinity.Dvcs.Extensions\bin\$(publish_configuration)\netcoreapp2.0\linux-x64\publish
+  name: $(APPVEYOR_PROJECT_NAME)-linux-x64-$(appveyor_build_version)
+- path: src\Itofinity.Dvcs.Extensions\bin\$(publish_configuration)\netcoreapp2.0\osx-x64\publish
+  name: $(APPVEYOR_PROJECT_NAME)-osx-x64-$(appveyor_build_version)
+deploy:
+- provider: GitHub
+  release: $(APPVEYOR_PROJECT_NAME)-v$(appveyor_build_version)
+  description: 'CI Release'
+  auth_token: 
+    secure: $(github_access_token) # your encrypted token from GitHub
+  artifact: /.*$(APPVEYOR_PROJECT_NAME)-(win|linux|osx)-x64-$(appveyor_build_version).*/            # upload all NuGet packages to release assets
+  draft: true
+  prerelease: true
+  on:
+    branch: master   
+on_success:
+  - git config --global credential.helper store
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:github_access_token):x-oauth-basic@github.com`n"
+  - git config --global user.email "$(APPVEYOR_PROJECT_NAME)@ci.appveyor.com"
+  - git config --global user.name "$(APPVEYOR_PROJECT_NAME) ci.appveyor"
+  - ps: git tag $Env:APPVEYOR_BUILD_VERSION
+  - git push --tags  
