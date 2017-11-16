@@ -4,7 +4,7 @@ image: Visual Studio 2017 Preview
 environment:
   project_name: Itofinity-Dvcs-Extension
   github_access_token:
-    secure: goOlUHXLAwoZzDBjQLIDVMPJlsSwXcxKE/ulw4qrmZRyvMwOi37SOHCP6a2ADqMY
+    secure: MvIdJbnvR3JUstzeWq9cCJqUoWH1d3t3m5pxpktdV1GafjR/C7fBmxMd5R+xx4Pt
   nuget_api_key:
     secure: qTIvhxyMmoK96PQjCdn6o1hzwsc9vivjNpmbQ9s/xnqpKrnQVAxRTa0gK5VQ3yGs
   test_configuration: Debug
@@ -29,7 +29,7 @@ deploy:
   release: $(APPVEYOR_PROJECT_NAME)-v$(appveyor_build_version)
   description: 'CI Release'
   auth_token: 
-    secure: $(github_access_token) # your encrypted token from GitHub
+    secure: MvIdJbnvR3JUstzeWq9cCJqUoWH1d3t3m5pxpktdV1GafjR/C7fBmxMd5R+xx4Pt # your encrypted token from GitHub
   artifact: /.*$(APPVEYOR_PROJECT_NAME)-(win|linux|osx)-x64-$(appveyor_build_version).*/            # upload all NuGet packages to release assets
   draft: true
   prerelease: true
